@@ -1,0 +1,82 @@
+name: blackgate
+include:
+  - ../blockchain-local-setup/docker-compose.yml
+services:
+  connector:
+    build:
+      context: ../connector
+    # environment:
+      # - PYTHONPATH=/app
+    ports:
+      - "10000:8000"
+    env_file:
+      - ${ENV_FILE}
+    # depends_on:
+      # - credential-server
+      # - supabase
+      # - grafana
+    # volumes:
+      # - ../connector:/app
+    # command: ls -la /app
+    networks:
+      - core-network
+
+  # credential-server:
+  #   build:
+  #     context: ../credential-issuer
+  #   env_file:
+  #     - ${ENV_FILE}
+  #   depends_on:
+  #     - blockchain
+  #   networks:
+  #     - core-network
+
+  # reth:
+  #   extends:
+  #     file: ../blockchain-local-setup/docker-compose.yml
+  #     service: reth
+  #   networks:
+  #     - core-network
+  # postgres:
+  #   extends:
+  #     file: ../blockchain-local-setup/docker-compose.yml
+  #     service: postgres
+  #   networks:
+  #     - core-network
+  # zksync:
+  #   extends:
+  #     file: ../blockchain-local-setup/docker-compose.yml
+  #     service: zksync
+  #   networks:
+  #     - core-network
+
+  # blockchain:
+  #   # build: ../blockchain-local-setup
+  #   depends_on:
+  #     - reth
+  #     - postgres
+  #     - zksync
+
+  # GRAFANA WOKRS FINE
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   ports:
+  #     - "3001:3000"
+  #   volumes:
+  #     - ../grafana/files/${DEPLOY_ENV}/grafana.ini:/etc/grafana/grafana.ini
+  #     - ../grafana/files/${DEPLOY_ENV}/grafana.db:/var/lib/grafana/grafana.db
+  #   networks:
+  #     - core-network
+
+  # supabase:
+  #   build: 
+  #     context: ../supabase
+  #   env_file:
+  #     - ${ENV_FILE}
+  #   volumes:
+  #     - ../supabase:/app
+  #   networks:
+  #     - core-network
+
+networks:
+  core-network:
