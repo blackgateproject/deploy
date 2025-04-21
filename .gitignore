@@ -1,2 +1,4 @@
 .venv
 /hide vars
+.env
+.env.*
