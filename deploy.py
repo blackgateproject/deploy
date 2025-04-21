@@ -105,7 +105,7 @@ print(f"{'*' * 50}\n")
 # Check for repos if they exist
 local_repos = {
     "supabase": "../supabase",
-    "blockchain": "../blockchain-local-setup",
+    "blockchain-local-setup": "../blockchain-local-setup",
     "credential-issuer": "../credential-issuer",
     "connector": "../connector",
     "grafana": "../grafana"}
