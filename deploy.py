@@ -126,9 +126,13 @@ for repo_name, repo_path in repos.items():
     repo_path = Path(repo_path)
     if not repo_path.is_dir():
         print(f"Cloning {repo_name} repository...")
-        # if repo_name == "supabase":
-            # subprocess.run(["git", "c/lone", "https://github.com/supabase/supabase"], repo_path), check=True)
-        # elif repo_name == "blockchain":
+        try:
+            for repo in repos:
+                subprocess.run(["git", "clone", f"https://github.com/blackgateproject/f{repo}.git"], check=True) 
+                print(f"Cloned {repo_name} repository.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error cloning {repo_name} repository: {e}")
+            sys.exit(1)
     else:
         repo_available += 1
         # print(f"{repo_name} repository already exists. Pulling latest changes...")
