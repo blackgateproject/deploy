@@ -106,13 +106,13 @@ print(f"{'*' * 50}\n")
 local_repos = {
     "supabase": "../supabase",
     "blockchain": "../blockchain-local-setup",
-    "cred-server": "../credential-issuer",
+    "credential-issuer": "../credential-issuer",
     "connector": "../connector",
     "grafana": "../grafana"}
 public_repos = {
     # "supabase": "../supabase",
     # "blockchain": "../blockchain-local-setup",
-    "cred-server": "../credential-issuer",
+    "credential-issuer": "../credential-issuer",
     "connector": "../connector",
     "grafana": "../grafana"}
 
