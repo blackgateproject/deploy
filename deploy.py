@@ -128,7 +128,7 @@ for repo_name, repo_path in repos.items():
         print(f"Cloning {repo_name} repository...")
         try:
             for repo in repos:
-                subprocess.run(["git", "clone", f"https://github.com/blackgateproject/f{repo}.git"], check=True) 
+                subprocess.run(["git", "clone", f"https://github.com/blackgateproject/{repo}.git"], check=True) 
                 print(f"Cloned {repo_name} repository.")
         except subprocess.CalledProcessError as e:
             print(f"Error cloning {repo_name} repository: {e}")
