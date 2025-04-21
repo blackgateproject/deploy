@@ -127,15 +127,20 @@ for repo_name, repo_path in repos.items():
     if not repo_path.is_dir():
         print(f"Cloning {repo_name} repository...")
         try:
-            for repo in repos:
-                subprocess.run(["git", "clone", f"https://github.com/blackgateproject/{repo}.git"], check=True) 
-                print(f"Cloned {repo_name} repository.")
+            subprocess.run(["git", "clone", f"https://github.com/blackgateproject/{repo_name}.git", str(repo_path)], check=True)
+            print(f"Cloned {repo_name} repository.")
         except subprocess.CalledProcessError as e:
             print(f"Error cloning {repo_name} repository: {e}")
             sys.exit(1)
     else:
+        print(f"{repo_name} repository already exists. Pulling latest changes...")
+        try:
+            subprocess.run(["git", "-C", str(repo_path), "pull"], check=True)
+            print(f"Pulled latest changes for {repo_name} repository.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error pulling latest changes for {repo_name} repository: {e}")
+            sys.exit(1)
         repo_available += 1
-        # print(f"{repo_name} repository already exists. Pulling latest changes...")
 print(f"Available Repositories: {repo_available}/{len(repos)}")
 # Start deployment on docker
 print(f"\n{'*' * 50}")
