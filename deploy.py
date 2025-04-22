@@ -201,7 +201,11 @@ for repo_name, repo_path in repos.items():
                 print(f"Skipping dependency installation for {repo_name} repository.")
             else:
                 subprocess.run(
-                    ["pip install -r requirements.txt"],
+                    [
+                        "python -m venv .venv",
+                        ".\.venv\Scripts\activate",
+                        "pip3 install -r requirements.txt",
+                    ],
                     cwd=str(f"{repo_path}"),
                     check=True,
                     shell=True,
