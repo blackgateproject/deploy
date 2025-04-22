@@ -160,14 +160,26 @@ for repo_name, repo_path in repos.items():
         except subprocess.CalledProcessError as e:
             print(f"Error cloning {repo_name} repository: {e}")
             sys.exit(1)
+        
+        # Install dependencies
+        print(f"Installing dependencies for {repo_name}...")
+        try:
+            if repo_name in ["supabase-cli", "blockchain-contracts", "frontend", "credential-issuer", "supabase-cli"]:
+                subprocess.run(["npm", "install"], cwd=str(repo_path), check=True, shell=True, text=True)
+            else:
+                subprocess.run(["pip", "install", "-r", "requirements.txt"], cwd=str(repo_path), check=True, shell=True, text=True)
+            print(f"Installed dependencies for {repo_name} repository.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error installing dependencies for {repo_name} repository: {e}")
+            sys.exit(1)
     else:
-        # print(f"{repo_name} repository already exists. Pulling latest changes...")
-        # try:
-        #     subprocess.run(["git", "-C", str(repo_path), "pull"], check=True)
-        #     print(f"Pulled latest changes for {repo_name} repository.")
-        # except subprocess.CalledProcessError as e:
-        #     print(f"Error pulling latest changes for {repo_name} repository: {e}")
-        #     sys.exit(1)
+        print(f"{repo_name} repository already exists. Pulling latest changes...")
+        try:
+            subprocess.run(["git", "-C", str(repo_path), "pull"], check=True)
+            print(f"Pulled latest changes for {repo_name} repository.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error pulling latest changes for {repo_name} repository: {e}")
+            sys.exit(1)
         repo_available += 1
 print(f"Available Repositories: {repo_available}/{len(repos)}")
 # Start deployment on docker
