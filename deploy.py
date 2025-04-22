@@ -167,7 +167,7 @@ for repo_name, repo_path in repos.items():
             if repo_name in ["supabase-cli", "blockchain-contracts", "frontend", "credential-issuer", "supabase-cli"]:
                 subprocess.run(["npm", "install"], cwd=str(f"{repo_path}"), check=True, shell=True, text=True)
                 # do not install anything for blockchain-local-setup
-            elif repo_name == "blockchain-local-setup":
+            elif repo_name in ["blockchain-local-setup", "grafana"]:
                 print(f"Skipping dependency installation for {repo_name} repository.")
             else:
                 subprocess.run(
