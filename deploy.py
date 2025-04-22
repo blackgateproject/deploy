@@ -202,8 +202,8 @@ for repo_name, repo_path in repos.items():
             else:
                 subprocess.run(
                     [
-                        "python -m venv .venv",
-                        ".\.venv\Scripts\activate",
+                        "python3 -m venv .venv",
+                        "./.venv/Scripts/activate",
                         "pip3 install -r requirements.txt",
                     ],
                     cwd=str(f"{repo_path}"),
@@ -336,7 +336,7 @@ if deploy_mode == "local":
         while True:
             try:
                 result = subprocess.run(
-                    ["docker compose --env-file", str(env_file), "ps zksync"],
+                    ["docker", "compose", "--env-file", str(env_file), "ps", "zksync"],
                     check=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
