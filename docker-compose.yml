@@ -1,73 +1,83 @@
 name: blackgate
 # include:
-  # - ../blockchain-local-setup/docker-compose.yml
+# - ../blockchain-local-setup/docker-compose.yml
 services:
+  frontend:
+    build:
+      context: ../frontend
+    ports:
+      - "10000:80"
+    env_file:
+      - ${ENV_FILE}
+    profiles:
+      - deploy
+    depends_on:
+      - connector
+    
+
   connector:
     build:
       context: ../connector
     # environment:
-      # - PYTHONPATH=/app
+    # - PYTHONPATH=/app
     ports:
-      - "10000:8000"
+      - "10001:8000"
     env_file:
       - ${ENV_FILE}
-    # depends_on:
-      # - credential-server
-      # - supabase
-      # - grafana
+    depends_on:
+      - credential-server
+      - grafana
     # volumes:
-      # - ../connector:/app
+    # - ../connector:/app
     # command: ls -la /app
-    networks:
-      - core-network
+    profiles:
+      - deploy
+    
 
   credential-server:
     build:
       context: ../credential-issuer
+    ports:
+      - "10002:3000"
     env_file:
       - ${ENV_FILE}
-    # depends_on:
-      # - blockchain
-    networks:
-      - core-network
+    depends_on:
+      - zksync
+    profiles:
+      - deploy
+    
 
   reth:
     extends:
       file: ../blockchain-local-setup/docker-compose.yml
       service: reth
-    networks:
-      - core-network
+    profiles: ["blockchain", "deploy"]
+
   postgres:
     extends:
       file: ../blockchain-local-setup/docker-compose.yml
       service: postgres
-    networks:
-      - core-network
+    profiles: ["blockchain", "deploy"]
+
   zksync:
     extends:
       file: ../blockchain-local-setup/docker-compose.yml
       service: zksync
-    networks:
-      - core-network
-
-  # blockchain:
-  #   # build: ../blockchain-local-setup
-  #   depends_on:
-  #     - reth
-  #     - postgres
-  #     - zksync
+    ports:
+      - "10005:3000"
+    profiles: ["blockchain", "deploy"]
 
   # GRAFANA WOKRS FINE
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3001:3000"
+      - "10004:3000"
     volumes:
       - ../grafana/files/${DEPLOY_ENV}/grafana.ini:/etc/grafana/grafana.ini
       - ../grafana/files/${DEPLOY_ENV}/grafana.db:/var/lib/grafana/grafana.db
-    networks:
-      - core-network
+    depends_on:
+      - zksync
+    profiles:
+      - deploy
+    
 
- 
-networks:
-  core-network:
