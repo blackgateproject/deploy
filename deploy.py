@@ -7,12 +7,17 @@ Primary Goals:
     5. Deploy supabase container via supabase-cli
 """
 
-from encodings.base64_codec import base64_encode
+import os
 import re
-import os, shutil, subprocess, sys, time
+import shutil
+import subprocess
+import sys
+import time
+from encodings.base64_codec import base64_encode
 from pathlib import Path
+
 import jwt
-from dotenv import load_dotenv, set_key, dotenv_values
+from dotenv import dotenv_values, load_dotenv, set_key
 
 print(f"\n{'*' * 50}")
 print(f"\tStarting Deployment Script")
@@ -42,17 +47,18 @@ print(f"{'*' * 50}\n")
 envs = [
     "DEPLOY_ENV",
     "ENV_FILE",
-    "SUPABASE_URL", 
+    "SUPABASE_URL",
     "SUPABASE_JWT_ALGORITHM",
-    "SUPABASE_JWT_EXPIRES", 
-    "SUPABASE_AUTH_ANON_KEY", 
-    "SUPABASE_AUTH_SERV_KEY", 
+    "SUPABASE_JWT_EXPIRES",
+    "SUPABASE_AUTH_ANON_KEY",
+    "SUPABASE_AUTH_SERV_KEY",
     "SUPABASE_AUTH_JWT_SECRET",
-    "BLOCKCHAIN_RPC_URL", 
-    "BLOCKCHAIN_CHAIN_ID", 
+    "BLOCKCHAIN_RPC_URL",
+    "BLOCKCHAIN_CHAIN_ID",
     "BLOCKCHAIN_DID_REGISTRY_ADDR",
-    "BLOCKCHAIN_MERKLE_ADDR", 
-    "CRED_SERVER_URL"]
+    "BLOCKCHAIN_MERKLE_ADDR",
+    "CRED_SERVER_URL",
+]
 
 default_envs = {
     "SUPABASE_JWT_ALGORITHM": "HS256",
@@ -78,21 +84,23 @@ default_envs = {
 
 # Check if the env file exists
 if not env_file.is_file():
-    print(f"WARN: {env_file} does not exist. Please create it before running this script.")
+    print(
+        f"WARN: {env_file} does not exist. Please create it before running this script."
+    )
     create_file = input(f"Do you want to create {env_file}? (y/n): ").strip().lower()
     if create_file == "y":
         with open(env_file, "w") as f:
             f.write("# Autogen variables\n")
-        
+
         # Set initial values using dotenv
         set_key(str(env_file), "DEPLOY_ENV", deploy_mode)
         set_key(str(env_file), "ENV_FILE", str(env_file))
-        
+
         # Create empty entries for the remaining variables
         for env in envs:
             if env not in ["DEPLOY_ENV", "ENV_FILE"]:
                 set_key(str(env_file), env, "")
-        
+
         # Update default env vars
         for env in default_envs:
             set_key(str(env_file), env, default_envs[env])
@@ -117,7 +125,7 @@ else:
         if env not in env_values or not env_values[env]:
             print(f"WARN: {env} is not set in {env_file}. Please set it.")
             missing_vars.append(env)
-    
+
     if missing_vars:
         print(f"\nMissing {len(missing_vars)} environment variables.")
     else:
@@ -138,11 +146,13 @@ local_repos = {
     "credential-issuer": "../credential-issuer",
     "connector": "../connector",
     "frontend": "../frontend",
-    "grafana": "../grafana"}
+    "grafana": "../grafana",
+}
 public_repos = {
     "credential-issuer": "../credential-issuer",
     "connector": "../connector",
-    "grafana": "../grafana"}
+    "grafana": "../grafana",
+}
 
 if deploy_mode == "local":
     repos = local_repos
@@ -155,7 +165,15 @@ for repo_name, repo_path in repos.items():
     if not repo_path.is_dir():
         print(f"Cloning {repo_name} repository...")
         try:
-            subprocess.run(["git", "clone", f"https://github.com/blackgateproject/{repo_name}.git", str(repo_path)], check=True)
+            subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    f"https://github.com/blackgateproject/{repo_name}.git",
+                    str(repo_path),
+                ],
+                check=True,
+            )
             print(f"Cloned {repo_name} repository.")
         except subprocess.CalledProcessError as e:
             print(f"Error cloning {repo_name} repository: {e}")
@@ -164,8 +182,20 @@ for repo_name, repo_path in repos.items():
         # Install dependencies
         print(f"Installing dependencies for {repo_name}...")
         try:
-            if repo_name in ["supabase-cli", "blockchain-contracts", "frontend", "credential-issuer", "supabase-cli"]:
-                subprocess.run(["npm install"], cwd=str(f"{repo_path}"), check=True, shell=True, text=True)
+            if repo_name in [
+                "supabase-cli",
+                "blockchain-contracts",
+                "frontend",
+                "credential-issuer",
+                "supabase-cli",
+            ]:
+                subprocess.run(
+                    ["npm install"],
+                    cwd=str(f"{repo_path}"),
+                    check=True,
+                    shell=True,
+                    text=True,
+                )
                 # do not install anything for blockchain-local-setup
             elif repo_name in ["blockchain-local-setup", "grafana"]:
                 print(f"Skipping dependency installation for {repo_name} repository.")
@@ -198,7 +228,9 @@ print(f"{'*' * 50}\n")
 
 # Check if docker is running
 try:
-    subprocess.run(["docker info"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.run(
+        ["docker", "info"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
 except subprocess.CalledProcessError as e:
     print("Docker is not running. Please start Docker and try again.")
     sys.exit(1)
@@ -211,24 +243,32 @@ if not env_values.get("SUPABASE_AUTH_JWT_SECRET"):
     # Generate a JWT secret. 40 chars random capitalization
     jwt_secret = os.urandom(40).hex()
     jwt_secret = base64_encode(jwt_secret.encode())[0].decode("utf-8")
-    jwt_secret = re.sub(r'[\n\r]', '', jwt_secret)
+    jwt_secret = re.sub(r"[\n\r]", "", jwt_secret)
     print(f"Generated SUPABASE_JWT_SECRET: {jwt_secret}")
 
     # Generate anon key based on JWT secret
     anon_key = jwt.encode(
-                            {"role": "anon", 
-                            "iss": "supabase", 
-                            "iat": int(time.time()), 
-                            "exp": int(time.time()) + 60 * 60 * 24 * 365 * 5}  # expire after 5 years
-                            , jwt_secret, algorithm="HS256")
+        {
+            "role": "anon",
+            "iss": "supabase",
+            "iat": int(time.time()),
+            "exp": int(time.time()) + 60 * 60 * 24 * 365 * 5,
+        },  # expire after 5 years
+        jwt_secret,
+        algorithm="HS256",
+    )
     print(f"Generated SUPABASE_AUTH_ANON_KEY: {anon_key}")
 
     serv_key = jwt.encode(
-                            {"role": "service_role", 
-                            "iss": "supabase", 
-                            "iat": int(time.time()), 
-                            "exp": int(time.time()) + 60 * 60 * 24 * 365 * 5}
-                            , jwt_secret, algorithm="HS256")
+        {
+            "role": "service_role",
+            "iss": "supabase",
+            "iat": int(time.time()),
+            "exp": int(time.time()) + 60 * 60 * 24 * 365 * 5,
+        },
+        jwt_secret,
+        algorithm="HS256",
+    )
     print(f"Generated SUPABASE_AUTH_SERV_KEY: {serv_key}")
 
     # Update the env file directly
@@ -259,10 +299,7 @@ if deploy_mode == "local":
     # Start supabase
     try:
         result = subprocess.run(
-            ["npx supabase start"],
-            cwd="../supabase-cli",
-            shell=True,
-            text=True
+            ["npx supabase start"], cwd="../supabase-cli", shell=True, text=True
         )
         print(result.stdout if result.stdout else "No stdout output")
         print(result.stderr if result.stderr else "No stderr output")
@@ -277,7 +314,19 @@ if deploy_mode == "local":
     print(f"{'*' * 50}\n")
     # Start zksync node first
     try:
-        subprocess.run(["docker compose --env-file", str(env_file),"--profile","blockchain","up",  "-d"], check=True)
+        subprocess.run(
+            [
+                "docker",
+                "compose",
+                "--env-file",
+                str(env_file),
+                "--profile",
+                "blockchain",
+                "up",
+                "-d",
+            ],
+            check=True,
+        )
         # wait for zksync to be healthy, run docker compose --env-file .env.local ps zksync until the log says (healthy)
         print(f"Waiting for zksync node to be healthy...")
         while True:
@@ -287,7 +336,7 @@ if deploy_mode == "local":
                     check=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    text=True
+                    text=True,
                 )
                 # print(result.stdout if result.stdout else "No stdout output")
                 # print(result.stderr if result.stderr else "No stderr output")
@@ -306,7 +355,13 @@ if deploy_mode == "local":
         # Compile & Deploy contracts (cd ../blockchain-contracts; npm run compile; npm run deploy-local)
         try:
             print(f"Compiling contracts...")
-            subprocess.run(["npm run compile"], cwd="../blockchain-contracts", check=True, shell=True, text=True)
+            subprocess.run(
+                ["npm run compile"],
+                cwd="../blockchain-contracts",
+                check=True,
+                shell=True,
+                text=True,
+            )
             print(f"Compiled contracts successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Error compiling contracts: {e}")
@@ -316,14 +371,27 @@ if deploy_mode == "local":
             # Set os env var WALLET_PRIVATE_KEY to BLOCKCHAIN_WALLET_PRVT_KEY
             os.environ["WALLET_PRIVATE_KEY"] = env_values["BLOCKCHAIN_WALLET_PRVT_KEY"]
             # run process with env var and capture output
-            result = subprocess.run(["npm run deploy-local"], cwd="../blockchain-contracts", check=True, shell=True, text=True, capture_output=True)
+            result = subprocess.run(
+                ["npm run deploy-local"],
+                cwd="../blockchain-contracts",
+                check=True,
+                shell=True,
+                text=True,
+                capture_output=True,
+            )
             print(f"Deployed contracts successfully.")
 
             # Extract contract addresses from output
             output = result.stdout
             # print(f"Deployment output: {output}")
-            merkle_match = re.search(r'"Merkle" was successfully deployed:[\s\S]*?Contract address: (0x[a-fA-F0-9]{40})', output)
-            did_match = re.search(r'"EthereumDIDRegistry" was successfully deployed:[\s\S]*?Contract address: (0x[a-fA-F0-9]{40})', output)
+            merkle_match = re.search(
+                r'"Merkle" was successfully deployed:[\s\S]*?Contract address: (0x[a-fA-F0-9]{40})',
+                output,
+            )
+            did_match = re.search(
+                r'"EthereumDIDRegistry" was successfully deployed:[\s\S]*?Contract address: (0x[a-fA-F0-9]{40})',
+                output,
+            )
 
             merkle_address = merkle_match.group(1) if merkle_match else None
             did_address = did_match.group(1) if did_match else None
@@ -337,7 +405,9 @@ if deploy_mode == "local":
                 set_key(str(env_file), "BLOCKCHAIN_DID_REGISTRY_ADDR", did_address)
                 print(f"Updated {env_file} with contract addresses.")
             else:
-                print("Warning: Could not extract one or both contract addresses from deployment output.")
+                print(
+                    "Warning: Could not extract one or both contract addresses from deployment output."
+                )
         except subprocess.CalledProcessError as e:
             print(f"Error deploying contracts: {e}")
             sys.exit(1)
@@ -354,7 +424,19 @@ print(f"{'*' * 50}\n")
 
 # Start supabase docker-compose.yml i.e. other services
 try:
-    subprocess.run(["docker compose --env-file", str(env_file),"--profile","deploy","up",  "-d"], check=True)
+    subprocess.run(
+        [
+            "docker",
+            "compose",
+            "--env-file",
+            str(env_file),
+            "--profile",
+            "deploy",
+            "up",
+            "-d",
+        ],
+        check=True,
+    )
     print(f"Started Supabase Docker containers successfully.")
     print(f"Please view logs in Docker Desktop or docker ps...")
 except subprocess.CalledProcessError as e:
