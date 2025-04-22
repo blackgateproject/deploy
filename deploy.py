@@ -260,7 +260,7 @@ if deploy_mode == "local":
     try:
         result = subprocess.run(
             ["npx", "supabase", "start"],
-            cwd="..\\supabase-cli\\",
+            cwd="../supabase-cli",
             shell=True,
             text=True
         )
