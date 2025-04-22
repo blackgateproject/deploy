@@ -155,7 +155,7 @@ for repo_name, repo_path in repos.items():
     if not repo_path.is_dir():
         print(f"Cloning {repo_name} repository...")
         try:
-            subprocess.run(["git", "clone", f"https://github.com/blackgateproject/{repo_name}.git", str(repo_path)], check=True)
+            subprocess.run(["git clone", f"https://github.com/blackgateproject/{repo_name}.git", str(repo_path)], check=True)
             print(f"Cloned {repo_name} repository.")
         except subprocess.CalledProcessError as e:
             print(f"Error cloning {repo_name} repository: {e}")
@@ -165,13 +165,13 @@ for repo_name, repo_path in repos.items():
         print(f"Installing dependencies for {repo_name}...")
         try:
             if repo_name in ["supabase-cli", "blockchain-contracts", "frontend", "credential-issuer", "supabase-cli"]:
-                subprocess.run(["npm", "install"], cwd=str(f"{repo_path}"), check=True, shell=True, text=True)
+                subprocess.run(["npm install"], cwd=str(f"{repo_path}"), check=True, shell=True, text=True)
                 # do not install anything for blockchain-local-setup
             elif repo_name in ["blockchain-local-setup", "grafana"]:
                 print(f"Skipping dependency installation for {repo_name} repository.")
             else:
                 subprocess.run(
-                    ["pip", "install", "-r", "requirements.txt"],
+                    ["pip install -r requirements.txt"],
                     cwd=str(f"{repo_path}"),
                     check=True,
                     shell=True,
@@ -184,7 +184,7 @@ for repo_name, repo_path in repos.items():
     else:
         print(f"{repo_name} repository already exists. Pulling latest changes...")
         try:
-            subprocess.run(["git", "-C", str(repo_path), "pull"], check=True)
+            subprocess.run(["git -C", str(repo_path), "pull"], check=True)
             print(f"Pulled latest changes for {repo_name} repository.")
         except subprocess.CalledProcessError as e:
             print(f"Error pulling latest changes for {repo_name} repository: {e}")
@@ -198,7 +198,7 @@ print(f"{'*' * 50}\n")
 
 # Check if docker is running
 try:
-    subprocess.run(["docker", "info"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.run(["docker info"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 except subprocess.CalledProcessError as e:
     print("Docker is not running. Please start Docker and try again.")
     sys.exit(1)
@@ -259,7 +259,7 @@ if deploy_mode == "local":
     # Start supabase
     try:
         result = subprocess.run(
-            ["npx", "supabase", "start"],
+            ["npx supabase start"],
             cwd="../supabase-cli",
             shell=True,
             text=True
@@ -277,13 +277,13 @@ if deploy_mode == "local":
     print(f"{'*' * 50}\n")
     # Start zksync node first
     try:
-        subprocess.run(["docker", "compose", "--env-file", str(env_file),"--profile","blockchain","up",  "-d"], check=True)
+        subprocess.run(["docker compose --env-file", str(env_file),"--profile","blockchain","up",  "-d"], check=True)
         # wait for zksync to be healthy, run docker compose --env-file .env.local ps zksync until the log says (healthy)
         print(f"Waiting for zksync node to be healthy...")
         while True:
             try:
                 result = subprocess.run(
-                    ["docker", "compose", "--env-file", str(env_file), "ps", "zksync"],
+                    ["docker compose --env-file", str(env_file), "ps zksync"],
                     check=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -306,7 +306,7 @@ if deploy_mode == "local":
         # Compile & Deploy contracts (cd ../blockchain-contracts; npm run compile; npm run deploy-local)
         try:
             print(f"Compiling contracts...")
-            subprocess.run(["npm", "run", "compile"], cwd="../blockchain-contracts", check=True, shell=True, text=True)
+            subprocess.run(["npm run compile"], cwd="../blockchain-contracts", check=True, shell=True, text=True)
             print(f"Compiled contracts successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Error compiling contracts: {e}")
@@ -316,7 +316,7 @@ if deploy_mode == "local":
             # Set os env var WALLET_PRIVATE_KEY to BLOCKCHAIN_WALLET_PRVT_KEY
             os.environ["WALLET_PRIVATE_KEY"] = env_values["BLOCKCHAIN_WALLET_PRVT_KEY"]
             # run process with env var and capture output
-            result = subprocess.run(["npm", "run", "deploy-local"], cwd="../blockchain-contracts", check=True, shell=True, text=True, capture_output=True)
+            result = subprocess.run(["npm run deploy-local"], cwd="../blockchain-contracts", check=True, shell=True, text=True, capture_output=True)
             print(f"Deployed contracts successfully.")
 
             # Extract contract addresses from output
@@ -354,7 +354,7 @@ print(f"{'*' * 50}\n")
 
 # Start supabase docker-compose.yml i.e. other services
 try:
-    subprocess.run(["docker", "compose", "--env-file", str(env_file),"--profile","deploy","up",  "-d"], check=True)
+    subprocess.run(["docker compose --env-file", str(env_file),"--profile","deploy","up",  "-d"], check=True)
     print(f"Started Supabase Docker containers successfully.")
     print(f"Please view logs in Docker Desktop or docker ps...")
 except subprocess.CalledProcessError as e:
