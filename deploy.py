@@ -179,39 +179,39 @@ for repo_name, repo_path in repos.items():
             print(f"Error cloning {repo_name} repository: {e}")
             sys.exit(1)
 
-        # Install dependencies
-        print(f"Installing dependencies for {repo_name}...")
-        try:
-            if repo_name in [
-                "supabase-cli",
-                "blockchain-contracts",
-                "frontend",
-                "credential-issuer",
-                "supabase-cli",
-            ]:
-                subprocess.run(
-                    ["npm install"],
-                    cwd=str(f"{repo_path}"),
-                    check=True,
-                    shell=True,
-                    text=True,
-                )
-                # do not install anything for blockchain-local-setup
-            elif repo_name in ["blockchain-local-setup", "grafana"]:
-                print(f"Skipping dependency installation for {repo_name} repository.")
-            else:
-                subprocess.run(
-                    [
-                        "python3 -m venv .venv",
-                        "./.venv/Scripts/activate",
-                        "pip3 install -r requirements.txt",
-                    ],
-                    cwd=str(f"{repo_path}"),
-                    check=True,
-                    shell=True,
-                    text=True,
-                )
-            print(f"Installed dependencies for {repo_name} repository.")
+        # # Install dependencies
+        # print(f"Installing dependencies for {repo_name}...")
+        # try:
+        #     if repo_name in [
+        #         "supabase-cli",
+        #         "blockchain-contracts",
+        #         "frontend",
+        #         "credential-issuer",
+        #         "supabase-cli",
+        #     ]:
+        #         subprocess.run(
+        #             ["npm install"],
+        #             cwd=str(f"{repo_path}"),
+        #             check=True,
+        #             shell=True,
+        #             text=True,
+        #         )
+        #         # do not install anything for blockchain-local-setup
+        #     elif repo_name in ["blockchain-local-setup", "grafana"]:
+        #         print(f"Skipping dependency installation for {repo_name} repository.")
+        #     else:
+        #         subprocess.run(
+        #             [
+        #                 "python3 -m venv .venv",
+        #                 "./.venv/Scripts/activate",
+        #                 "pip3 install -r requirements.txt",
+        #             ],
+        #             cwd=str(f"{repo_path}"),
+        #             check=True,
+        #             shell=True,
+        #             text=True,
+        #         )
+        #     print(f"Installed dependencies for {repo_name} repository.")
         except subprocess.CalledProcessError as e:
             print(f"Error installing dependencies for {repo_name} repository: {e}")
             sys.exit(1)
@@ -434,8 +434,7 @@ try:
             "compose",
             "--env-file",
             str(env_file),
-            "--profile",
-            "deploy",
+            "--profile deploy",
             "up",
             "-d",
         ],
