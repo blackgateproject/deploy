@@ -428,7 +428,7 @@ print(f"{'*' * 50}\n")
 
 # Start supabase docker-compose.yml i.e. other services
 try:
-    result = subprocess.run(
+    subprocess.run(
         [
             "docker",
             "compose",
@@ -444,12 +444,8 @@ try:
         stderr=subprocess.PIPE,
         text=True,
     )
-    print(f"Command output: {result.stdout}")
-    if result.stderr:
-        print(f"Command errors: {result.stderr}")
-
-    print(f"Started Supabase Docker containers successfully.")
+    print(f"Started Remaining Docker containers successfully.")
     print(f"Please view logs in Docker Desktop or docker ps...")
 except subprocess.CalledProcessError as e:
-    print(f"Error starting Supabase Docker containers: {e}")
+    print(f"Error starting Remaining Docker containers: {e}")
     sys.exit(1)
