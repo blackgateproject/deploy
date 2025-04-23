@@ -428,18 +428,26 @@ print(f"{'*' * 50}\n")
 
 # Start supabase docker-compose.yml i.e. other services
 try:
-    subprocess.run(
+    result = subprocess.run(
         [
             "docker",
             "compose",
             "--env-file",
             str(env_file),
-            "--profile deploy",
+            "--profile",
+            "deploy",
             "up",
             "-d",
         ],
         check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     )
+    print(f"Command output: {result.stdout}")
+    if result.stderr:
+        print(f"Command errors: {result.stderr}")
+
     print(f"Started Supabase Docker containers successfully.")
     print(f"Please view logs in Docker Desktop or docker ps...")
 except subprocess.CalledProcessError as e:
