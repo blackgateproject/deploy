@@ -440,8 +440,6 @@ try:
             "-d",
         ],
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
         text=True,
     )
     print(f"Started Remaining Docker containers successfully.")
