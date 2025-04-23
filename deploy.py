@@ -300,6 +300,7 @@ if not env_values.get("SUPABASE_AUTH_JWT_SECRET"):
     print(f"WARN:: Using default JWT secret and keys. Please update them in {env_file}")
 
 if deploy_mode == "local":
+
     # Start supabase
     try:
         result = subprocess.run(
@@ -427,6 +428,8 @@ print(f"\tStarting Remaining Services Deployment")
 print(f"{'*' * 50}\n")
 
 # Start supabase docker-compose.yml i.e. other services
+# Load env vars before deployment
+load_dotenv(str(env_file))
 try:
     subprocess.run(
         [
