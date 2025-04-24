@@ -79,7 +79,6 @@ default_envs = {
     ),
     "CRED_SERVER_URL": "http://localhost:3000" if deploy_mode == "local" else "",
     "DEBUG": "8" if deploy_mode == "local" else "",
-    "INFURA_PROJECT_ID": "749ae3dccaaf43379574f7ab3e2e4697",
     "VITE_CONNECTOR_URL": "http://localhost:11000" if deploy_mode == "local" else "",
     "VITE_GRAFANA_URL": "http://localhost:3000",
 }
