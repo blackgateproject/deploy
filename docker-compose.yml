@@ -1,3 +1,9 @@
+# WARNING::
+# Failed to setup dynamic var loading for frontend
+# Any and all Variables for frontend have to be defined in 
+# docker.compose.yml | .env.example | dockerfile
+# WARNING::
+
 name: blackgate
 # include:
 # - ../blockchain-local-setup/docker-compose.yml
