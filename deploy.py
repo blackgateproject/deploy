@@ -8,6 +8,7 @@ Primary Goals:
 """
 
 import os
+import platform
 import re
 import shutil
 import subprocess
@@ -63,9 +64,11 @@ envs = [
 default_envs = {
     "SUPABASE_JWT_ALGORITHM": "HS256",
     "SUPABASE_JWT_EXPIRES": "3600",
-    "SUPABASE_URL": "http://localhost:54321" if deploy_mode == "local" else "",
+    "SUPABASE_URL": (
+        "http://supabase_db_supabase-cli:54321" if deploy_mode == "local" else ""
+    ),
     "BLOCKCHAIN_CHAIN_ID": "270" if deploy_mode == "local" else "300",
-    "BLOCKCHAIN_RPC_URL": "http://localhost:10005" if deploy_mode == "local" else "",
+    "BLOCKCHAIN_RPC_URL": "http://zksync:10005" if deploy_mode == "local" else "",
     "BLOCKCHAIN_WALLET_PRVT_KEY": (
         "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"
         if deploy_mode == "local"
@@ -77,10 +80,13 @@ default_envs = {
     "ZKSYNC_NODE_TYPE": (
         "dockerizedNode" if deploy_mode == "local" else "zkSyncSepoliaTestnet"
     ),
-    "CRED_SERVER_URL": "http://localhost:3000" if deploy_mode == "local" else "",
+    "CRED_SERVER_URL": (
+        "http://credential-server:5000" if deploy_mode == "local" else ""
+    ),
     "DEBUG": "8" if deploy_mode == "local" else "",
-    "VITE_CONNECTOR_URL": "http://localhost:11000" if deploy_mode == "local" else "",
-    "VITE_GRAFANA_URL": "http://localhost:3000",
+    # "VITE_CONNECTOR_URL": "http://localhost:10001" if deploy_mode == "local" else "",
+    "VITE_CONNECTOR_URL": "http://172.17.170.194:10001" if deploy_mode == "local" else "",
+    "VITE_GRAFANA_URL": "http://grafana:10004",
 }
 
 
@@ -303,18 +309,21 @@ if not env_values.get("SUPABASE_AUTH_JWT_SECRET"):
 
 if deploy_mode == "local":
 
-    # Start supabase
-    try:
-        result = subprocess.run(
-            ["npx supabase start"], cwd="../supabase-cli", shell=True, text=True
-        )
-        print(result.stdout if result.stdout else "No stdout output")
-        print(result.stderr if result.stderr else "No stderr output")
-    except subprocess.CalledProcessError as e:
-        print(f"Error starting Supabase CLI: {e}")
-        print(e.stdout)
-        print(e.stderr)
-        sys.exit(1)
+    # # Start supabase
+    # try:
+    #     command = (
+    #         ["npx", "supabase", "start"]
+    #         if platform.system() == "Windows"
+    #         else ["npx supabase start"]
+    #     )
+    #     result = subprocess.run(command, cwd="../supabase-cli", shell=True, text=True)
+    #     print(result.stdout if result.stdout else "No stdout output")
+    #     print(result.stderr if result.stderr else "No stderr output")
+    # except subprocess.CalledProcessError as e:
+    #     print(f"Error starting Supabase CLI: {e}")
+    #     print(e.stdout)
+    #     print(e.stderr)
+    #     sys.exit(1)
 
     print(f"\n{'*' * 50}")
     print(f"\tStarting Blockchain Deployment")
@@ -362,8 +371,15 @@ if deploy_mode == "local":
         # Compile & Deploy contracts (cd ../blockchain-contracts; npm run compile; npm run deploy-local)
         try:
             print(f"Compiling contracts...")
+
+            command = (
+                ["npm", "run", "compile"]
+                if platform.system() == "Windows"
+                else ["npm run compile"]
+            )
+
             subprocess.run(
-                ["npm run compile"],
+                command,
                 cwd="../blockchain-contracts",
                 check=True,
                 shell=True,
@@ -378,8 +394,13 @@ if deploy_mode == "local":
             # Set os env var WALLET_PRIVATE_KEY to BLOCKCHAIN_WALLET_PRVT_KEY
             os.environ["WALLET_PRIVATE_KEY"] = env_values["BLOCKCHAIN_WALLET_PRVT_KEY"]
             # run process with env var and capture output
+            command = (
+                ["npm", "run", "deploy-local"]
+                if platform.system() == "Windows"
+                else ["npm run deploy-local"]
+            )
             result = subprocess.run(
-                ["npm run deploy-local"],
+                command,
                 cwd="../blockchain-contracts",
                 check=True,
                 shell=True,

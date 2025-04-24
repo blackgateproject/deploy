@@ -12,14 +12,15 @@ services:
     build:
       context: ../frontend
     ports:
-      - "10000:80"
+      - "10000:5173"
     env_file:
       - ${ENV_FILE}
     profiles:
       - deploy
     depends_on:
       - connector
-    
+    networks:
+      - blackgate-network
 
   connector:
     build:
@@ -27,7 +28,7 @@ services:
     # environment:
     # - PYTHONPATH=/app
     ports:
-      - "10001:11000"
+      - "10001:10001"
     env_file:
       - ${ENV_FILE}
     depends_on:
@@ -38,19 +39,25 @@ services:
     # command: ls -la /app
     profiles:
       - deploy
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    networks:
+      - blackgate-network
     
 
   credential-server:
     build:
       context: ../credential-issuer
     ports:
-      - "10002:3000"
+      - "10002:5000"
     env_file:
       - ${ENV_FILE}
     depends_on:
       - zksync
     profiles:
       - deploy
+    networks:
+      - blackgate-network
     
 
   reth:
@@ -58,12 +65,16 @@ services:
       file: ../blockchain-local-setup/docker-compose.yml
       service: reth
     profiles: ["blockchain", "deploy"]
+    networks:
+      - blackgate-network
 
   postgres:
     extends:
       file: ../blockchain-local-setup/docker-compose.yml
       service: postgres
     profiles: ["blockchain", "deploy"]
+    networks:
+      - blackgate-network
 
   zksync:
     extends:
@@ -72,6 +83,8 @@ services:
     ports:
       - "10005:3000"
     profiles: ["blockchain", "deploy"]
+    networks:
+      - blackgate-network
 
   # GRAFANA WOKRS FINE
   grafana:
@@ -85,5 +98,10 @@ services:
       - zksync
     profiles:
       - deploy
+    networks:
+      - blackgate-network
     
 
+networks:
+  blackgate-network:
+    driver: bridge
