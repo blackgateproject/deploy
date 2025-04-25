@@ -86,16 +86,46 @@ envs = [
     "BLOCKCHAIN_MERKLE_ADDR",
     "CRED_SERVER_URL",
 ]
+# For windows
+# default_envs = {
+#     "SUPABASE_JWT_ALGORITHM": "HS256",
+#     "SUPABASE_JWT_EXPIRES": "3600",
+#     "SUPABASE_URL": (
+#         "http://host.docker.internal:54321" if deploy_mode == "local" else ""
+#     ),
+#     "BLOCKCHAIN_CHAIN_ID": "270" if deploy_mode == "local" else "300",
+#     "BLOCKCHAIN_RPC_URL": (
+#         "http://host.docker.internal:3050" if deploy_mode == "local" else ""
+#     ),
+#     "BLOCKCHAIN_WALLET_PRVT_KEY": (
+#         "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"
+#         if deploy_mode == "local"
+#         else ""
+#     ),
+#     "BLOCKCHAIN_WALLET_ADDR": (
+#         "0x36615Cf349d7F6344891B1e7CA7C72883F5dc049" if deploy_mode == "local" else ""
+#     ),
+#     "ZKSYNC_NODE_TYPE": (
+#         "dockerizedNode" if deploy_mode == "local" else "zkSyncSepoliaTestnet"
+#     ),
+#     "CRED_SERVER_URL": (
+#         "http://host.docker.internal:10002" if deploy_mode == "local" else ""
+#     ),
+#     "DEBUG": "8" if deploy_mode == "local" else "",
+#     "VITE_CONNECTOR_URL": f"http://{host_ip}:10001" if deploy_mode == "local" else "",
+#     # "VITE_CONNECTOR_URL": "http://172.17.170.194:10001" if deploy_mode == "local" else "",
+#     "VITE_GRAFANA_URL": f"http://{host_ip}:10004" if deploy_mode == "local" else "",
+# }
 
 default_envs = {
     "SUPABASE_JWT_ALGORITHM": "HS256",
     "SUPABASE_JWT_EXPIRES": "3600",
     "SUPABASE_URL": (
-        "http://host.docker.internal:54321" if deploy_mode == "local" else ""
+        f"http://{host_ip}:54321" if deploy_mode == "local" else ""
     ),
     "BLOCKCHAIN_CHAIN_ID": "270" if deploy_mode == "local" else "300",
     "BLOCKCHAIN_RPC_URL": (
-        "http://host.docker.internal:3050" if deploy_mode == "local" else ""
+        f"http://{host_ip}:3050" if deploy_mode == "local" else ""
     ),
     "BLOCKCHAIN_WALLET_PRVT_KEY": (
         "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"
@@ -109,7 +139,7 @@ default_envs = {
         "dockerizedNode" if deploy_mode == "local" else "zkSyncSepoliaTestnet"
     ),
     "CRED_SERVER_URL": (
-        "http://host.docker.internal:10002" if deploy_mode == "local" else ""
+        f"http://{host_ip}:10002" if deploy_mode == "local" else ""
     ),
     "DEBUG": "8" if deploy_mode == "local" else "",
     "VITE_CONNECTOR_URL": f"http://{host_ip}:10001" if deploy_mode == "local" else "",

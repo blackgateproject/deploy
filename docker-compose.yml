@@ -88,7 +88,7 @@ services:
       file: ../blockchain-local-setup/docker-compose.yml
       service: zksync
     ports:
-      - "10005:3000"
+      - "10005:3050"
     profiles: ["blockchain", "deploy"]
     networks:
       - blackgate-network
