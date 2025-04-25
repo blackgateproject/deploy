@@ -95,7 +95,7 @@ envs = [
 #     ),
 #     "BLOCKCHAIN_CHAIN_ID": "270" if deploy_mode == "local" else "300",
 #     "BLOCKCHAIN_RPC_URL": (
-#         "http://host.docker.internal:3050" if deploy_mode == "local" else ""
+#         "http://host.docker.internal:10005" if deploy_mode == "local" else ""
 #     ),
 #     "BLOCKCHAIN_WALLET_PRVT_KEY": (
 #         "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"
@@ -125,7 +125,7 @@ default_envs = {
     ),
     "BLOCKCHAIN_CHAIN_ID": "270" if deploy_mode == "local" else "300",
     "BLOCKCHAIN_RPC_URL": (
-        f"http://{host_ip}:3050" if deploy_mode == "local" else ""
+        f"http://{host_ip}:10005" if deploy_mode == "local" else ""
     ),
     "BLOCKCHAIN_WALLET_PRVT_KEY": (
         "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"
