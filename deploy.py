@@ -35,6 +35,32 @@ else:
     print("Invalid deploy mode. Exiting.")
     sys.exit(1)
 
+frontend_mode = input("Set a frontend mode \n1. Localhost \n2. Server\n\n")
+print(f"Frontend mode set to: {frontend_mode}")
+if frontend_mode == "1":
+    host_ip = "localhost"
+elif frontend_mode == "2":
+    # Get the local IP address of the machine, for linux use hostname -I | awk '{print $1}'
+    # For windows use ipconfig | findstr /i "ipv4" | findstr /i "192.168"
+
+    if platform.system() == "Windows":
+        host_ip = subprocess.check_output(
+            ["ipconfig"], text=True
+        ).split("IPv4 Address")[1].split(":")[1].strip()
+    elif platform.system() == "Linux":
+        host_ip = subprocess.check_output(
+            ["hostname", "-I"], text=True
+        ).split()[0].strip()
+    else:
+        print("Unsupported OS. Exiting.")
+        sys.exit(1)
+    print(f"Host IP set to: {host_ip}")
+
+
+else:
+    print("Invalid frontend mode. Exiting.")
+    sys.exit(1)
+
 # Check if .env.local or .env.public exists
 if deploy_mode == "local":
     env_file = Path(".env.local")
@@ -65,10 +91,12 @@ default_envs = {
     "SUPABASE_JWT_ALGORITHM": "HS256",
     "SUPABASE_JWT_EXPIRES": "3600",
     "SUPABASE_URL": (
-        "http://supabase_db_supabase-cli:54321" if deploy_mode == "local" else ""
+        "http://host.docker.internal:54321" if deploy_mode == "local" else ""
     ),
     "BLOCKCHAIN_CHAIN_ID": "270" if deploy_mode == "local" else "300",
-    "BLOCKCHAIN_RPC_URL": "http://zksync:10005" if deploy_mode == "local" else "",
+    "BLOCKCHAIN_RPC_URL": (
+        "http://host.docker.internal:3050" if deploy_mode == "local" else ""
+    ),
     "BLOCKCHAIN_WALLET_PRVT_KEY": (
         "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"
         if deploy_mode == "local"
@@ -81,12 +109,12 @@ default_envs = {
         "dockerizedNode" if deploy_mode == "local" else "zkSyncSepoliaTestnet"
     ),
     "CRED_SERVER_URL": (
-        "http://credential-server:5000" if deploy_mode == "local" else ""
+        "http://host.docker.internal:10002" if deploy_mode == "local" else ""
     ),
     "DEBUG": "8" if deploy_mode == "local" else "",
-    # "VITE_CONNECTOR_URL": "http://localhost:10001" if deploy_mode == "local" else "",
-    "VITE_CONNECTOR_URL": "http://172.17.170.194:10001" if deploy_mode == "local" else "",
-    "VITE_GRAFANA_URL": "http://grafana:10004",
+    "VITE_CONNECTOR_URL": f"http://{host_ip}:10001" if deploy_mode == "local" else "",
+    # "VITE_CONNECTOR_URL": "http://172.17.170.194:10001" if deploy_mode == "local" else "",
+    "VITE_GRAFANA_URL": f"http://{host_ip}:10004" if deploy_mode == "local" else "",
 }
 
 
@@ -309,21 +337,21 @@ if not env_values.get("SUPABASE_AUTH_JWT_SECRET"):
 
 if deploy_mode == "local":
 
-    # # Start supabase
-    # try:
-    #     command = (
-    #         ["npx", "supabase", "start"]
-    #         if platform.system() == "Windows"
-    #         else ["npx supabase start"]
-    #     )
-    #     result = subprocess.run(command, cwd="../supabase-cli", shell=True, text=True)
-    #     print(result.stdout if result.stdout else "No stdout output")
-    #     print(result.stderr if result.stderr else "No stderr output")
-    # except subprocess.CalledProcessError as e:
-    #     print(f"Error starting Supabase CLI: {e}")
-    #     print(e.stdout)
-    #     print(e.stderr)
-    #     sys.exit(1)
+    # Start supabase
+    try:
+        command = (
+            ["npx", "supabase", "start"]
+            if platform.system() == "Windows"
+            else ["npx supabase start"]
+        )
+        result = subprocess.run(command, cwd="../supabase-cli", shell=True, text=True)
+        print(result.stdout if result.stdout else "No stdout output")
+        print(result.stderr if result.stderr else "No stderr output")
+    except subprocess.CalledProcessError as e:
+        print(f"Error starting Supabase CLI: {e}")
+        print(e.stdout)
+        print(e.stderr)
+        sys.exit(1)
 
     print(f"\n{'*' * 50}")
     print(f"\tStarting Blockchain Deployment")
@@ -386,6 +414,7 @@ if deploy_mode == "local":
                 text=True,
             )
             print(f"Compiled contracts successfully.")
+
         except subprocess.CalledProcessError as e:
             print(f"Error compiling contracts: {e}")
             sys.exit(1)
@@ -436,6 +465,16 @@ if deploy_mode == "local":
                 print(
                     "Warning: Could not extract one or both contract addresses from deployment output."
                 )
+            
+            # Copy the deployments-zk folder to the connector folder
+            shutil.copytree(
+                "../blockchain-contracts/deployments-zk",
+                "../connector/app/utils/deployments-zk",
+                dirs_exist_ok=True,
+            )
+            print(f"Copied deployments-zk folder to connector folder successfully.")
+
+
         except subprocess.CalledProcessError as e:
             print(f"Error deploying contracts: {e}")
             sys.exit(1)

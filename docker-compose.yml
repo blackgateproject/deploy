@@ -8,17 +8,24 @@ name: blackgate
 # include:
 # - ../blockchain-local-setup/docker-compose.yml
 services:
+  # frontend:
+  #   build:
+  #     context: ../frontend
+  #   ports:
+  #     - "10000:5173"
+  #   env_file:
+  #     - ${ENV_FILE}
+  #   profiles:
+  #     - deploy
+  #   depends_on:
+  #     - connector
+  #   networks:
+  #     - blackgate-network
   frontend:
-    build:
-      context: ../frontend
-    ports:
-      - "10000:5173"
-    env_file:
-      - ${ENV_FILE}
-    profiles:
-      - deploy
-    depends_on:
-      - connector
+    extends:
+      file: ../frontend/docker-compose.yml
+      service: frontend
+    profiles: ["frontend", "deploy"]
     networks:
       - blackgate-network
 
@@ -37,8 +44,7 @@ services:
     # volumes:
     # - ../connector:/app
     # command: ls -la /app
-    profiles:
-      - deploy
+    profiles: ["deploy", "connector"]
     # extra_hosts:
     #   - "host.docker.internal:host-gateway"
     networks:
@@ -52,10 +58,9 @@ services:
       - "10002:5000"
     env_file:
       - ${ENV_FILE}
-    depends_on:
-      - zksync
-    profiles:
-      - deploy
+    # depends_on:
+      # - zksync
+    profiles: ["deploy", "credential-server", "connector"]
     networks:
       - blackgate-network
     
@@ -94,14 +99,15 @@ services:
     volumes:
       - ../grafana/files/${DEPLOY_ENV}/grafana.ini:/etc/grafana/grafana.ini
       - ../grafana/files/${DEPLOY_ENV}/grafana.db:/var/lib/grafana/grafana.db
-    depends_on:
-      - zksync
-    profiles:
-      - deploy
+    # depends_on:
+      # - zksync
+    profiles: ["deploy", "grafana", "connector"]
     networks:
       - blackgate-network
     
 
 networks:
   blackgate-network:
+    driver: bridge
+  frontend-network:
     driver: bridge
