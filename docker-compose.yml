@@ -26,6 +26,8 @@ services:
       file: ../frontend/docker-compose.yml
       service: frontend
     profiles: ["frontend", "deploy"]
+    ports:
+      - "10000:5173"
     networks:
       - blackgate-network
 
