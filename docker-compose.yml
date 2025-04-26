@@ -95,14 +95,16 @@ services:
 
   # GRAFANA WOKRS FINE
   grafana:
-    image: grafana/grafana:latest
+    extends:
+      file: ../grafana/docker-compose.yml
+      service: grafana
+    
     ports:
       - "10004:3000"
-    volumes:
-      - ../grafana/files/${DEPLOY_ENV}/grafana.ini:/etc/grafana/grafana.ini
-      - ../grafana/files/${DEPLOY_ENV}/grafana.db:/var/lib/grafana/grafana.db
     # depends_on:
       # - zksync
+    environment:
+      - GRAFANA_ENV=${GRAFANA_ENV:-public} 
     profiles: ["deploy", "grafana", "connector"]
     networks:
       - blackgate-network
@@ -113,3 +115,8 @@ networks:
     driver: bridge
   frontend-network:
     driver: bridge
+
+volumes:
+  grafana-config:
+  grafana-data:
+  

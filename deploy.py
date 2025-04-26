@@ -74,6 +74,7 @@ print(f"{'*' * 50}\n")
 envs = [
     "DEPLOY_ENV",
     "ENV_FILE",
+    "GRAFANA_ENV",
     "SUPABASE_URL",
     "SUPABASE_JWT_ALGORITHM",
     "SUPABASE_JWT_EXPIRES",
@@ -118,6 +119,7 @@ envs = [
 # }
 
 default_envs = {
+    "GRAFANA_ENV": f"server" if frontend_mode == "2" else "local",
     "SUPABASE_JWT_ALGORITHM": "HS256",
     "SUPABASE_JWT_EXPIRES": "3600",
     "SUPABASE_URL": (
