@@ -122,7 +122,7 @@ envs = [
 default_envs = {
     "GRAFANA_ENV": f"server" if frontend_mode == "2" else "local",
     "SUPABASE_JWT_ALGORITHM": "HS256",
-    "SUPABASE_DB_URL": "postgresql://postgres:postgres@127.0.0.1:54322/postgres" if deploy_mode == "local" else "",
+    "SUPABASE_DB_URL": f"postgresql://postgres:postgres@{host_ip}:54322/postgres" if deploy_mode == "local" else "",
     "SUPABASE_JWT_EXPIRES": "3600",
     "SUPABASE_URL": (f"http://{host_ip}:54321" if deploy_mode == "local" else ""),
     "BLOCKCHAIN_CHAIN_ID": "270" if deploy_mode == "local" else "300",
