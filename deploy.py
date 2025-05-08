@@ -38,7 +38,7 @@ else:
 frontend_mode = input("Set a frontend mode \n1. Localhost \n2. Server\n\n")
 print(f"Frontend mode set to: {frontend_mode}")
 if frontend_mode == "1":
-    host_ip = "localhost"
+    host_ip = "127.0.0.1"
 elif frontend_mode == "2":
     # Get the local IP address of the machine, for linux use hostname -I | awk '{print $1}'
     # For windows use ipconfig | findstr /i "ipv4" | findstr /i "192.168"
