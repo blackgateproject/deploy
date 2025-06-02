@@ -60,6 +60,12 @@ services:
       - "10002:5000"
     env_file:
       - ${ENV_FILE}
+    healthcheck:
+      test: curl --fail http://localhost:10002/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 200
+      start_period: 30s
     # depends_on:
       # - zksync
     profiles: ["deploy", "credential-server", "connector"]

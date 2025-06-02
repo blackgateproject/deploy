@@ -544,6 +544,7 @@ try:
             "deploy",
             "up",
             "-d",
+            "--build"
         ],
         check=True,
         text=True,
