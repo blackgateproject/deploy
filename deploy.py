@@ -122,11 +122,21 @@ envs = [
 default_envs = {
     "GRAFANA_ENV": f"server" if frontend_mode == "2" else "local",
     "SUPABASE_JWT_ALGORITHM": "HS256",
-    "SUPABASE_DB_URL": f"postgresql://postgres:postgres@{host_ip}:54322/postgres" if deploy_mode == "local" else "",
+    "SUPABASE_DB_URL": (
+        f"postgresql://postgres:postgres@{host_ip}:54322/postgres"
+        if deploy_mode == "local"
+        else ""
+    ),
     "SUPABASE_JWT_EXPIRES": "3600",
     "SUPABASE_URL": (f"http://{host_ip}:54321" if deploy_mode == "local" else ""),
     "BLOCKCHAIN_CHAIN_ID": "270" if deploy_mode == "local" else "300",
+    "VITE_BLOCKCHAIN_CHAIN_ID": (
+        "270" if deploy_mode == "local" else "300"
+    ),  # This is a duplicate but its used for the frontend
     "BLOCKCHAIN_RPC_URL": (f"http://{host_ip}:10005" if deploy_mode == "local" else ""),
+    "VITE_BLOCKCHAIN_RPC_PROVIDER": (
+        f"http://{host_ip}:10005" if deploy_mode == "local" else ""
+    ),  # This is a duplicate but its used for the frontend
     "BLOCKCHAIN_WALLET_PRVT_KEY": (
         "0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"
         if deploy_mode == "local"
@@ -490,6 +500,7 @@ if deploy_mode == "local":
                 # Update the env file with the contract addresses
                 set_key(str(env_file), "BLOCKCHAIN_MERKLE_ADDR", merkle_address)
                 set_key(str(env_file), "BLOCKCHAIN_DID_REGISTRY_ADDR", did_address)
+                set_key(str(env_file), "VITE_BLOCKCHAIN_DID_REGISTRY_ADDR", did_address)
                 print(f"Updated {env_file} with contract addresses.")
             else:
                 print(
