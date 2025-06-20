@@ -44,13 +44,16 @@ elif frontend_mode == "2":
     # For windows use ipconfig | findstr /i "ipv4" | findstr /i "192.168"
 
     if platform.system() == "Windows":
-        host_ip = subprocess.check_output(
-            ["ipconfig"], text=True
-        ).split("IPv4 Address")[1].split(":")[1].strip()
+        host_ip = (
+            subprocess.check_output(["ipconfig"], text=True)
+            .split("IPv4 Address")[1]
+            .split(":")[1]
+            .strip()
+        )
     elif platform.system() == "Linux":
-        host_ip = subprocess.check_output(
-            ["hostname", "-I"], text=True
-        ).split()[0].strip()
+        host_ip = (
+            subprocess.check_output(["hostname", "-I"], text=True).split()[0].strip()
+        )
     else:
         print("Unsupported OS. Exiting.")
         sys.exit(1)
@@ -251,6 +254,13 @@ for repo_name, repo_path in repos.items():
                 check=True,
             )
             print(f"Cloned {repo_name} repository.")
+            if repo_name == "connector":
+                subprocess.run(
+                    ["git", "checkout", "dev/research"],
+                    cwd=str(repo_path),
+                    check=True,
+                )
+                print(f"Checked out 'dev/research' branch for connector.")
         except subprocess.CalledProcessError as e:
             print(f"Error cloning {repo_name} repository: {e}")
             sys.exit(1)
@@ -506,7 +516,7 @@ if deploy_mode == "local":
                 print(
                     "Warning: Could not extract one or both contract addresses from deployment output."
                 )
-            
+
             # Copy the deployments-zk folder to the connector folder
             shutil.copytree(
                 "../blockchain-contracts/deployments-zk",
@@ -514,7 +524,6 @@ if deploy_mode == "local":
                 dirs_exist_ok=True,
             )
             print(f"Copied deployments-zk folder to connector folder successfully.")
-
 
         except subprocess.CalledProcessError as e:
             print(f"Error deploying contracts: {e}")
@@ -544,7 +553,7 @@ try:
             "deploy",
             "up",
             "-d",
-            "--build"
+            "--build",
         ],
         check=True,
         text=True,
